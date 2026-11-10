@@ -9,14 +9,31 @@ export type TimeComponents<T extends (number | bigint) = number> = {
 	nanoseconds: T;
 };
 
-export type Options = {
+export type TimeUnit = 'days' | 'hours' | 'minutes' | 'seconds' | 'milliseconds' | 'microseconds' | 'nanoseconds';
+
+export type Options<LargestUnit extends TimeUnit = 'days'> = {
 	/**
 	Include a `weeks` field, reducing `days` to its 0-6 remainder.
 
 	@default false
 	*/
 	readonly weeks?: boolean;
+
+	/**
+	The largest unit to include in the result. Every unit above it is folded into it and omitted from the returned object.
+
+	@default 'days'
+	*/
+	readonly largestUnit?: LargestUnit;
 };
+
+type TimeUnitOrder = ['days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds', 'nanoseconds'];
+
+type TimeUnitsAbove<U extends TimeUnit, Order extends TimeUnit[] = TimeUnitOrder> = Order extends [infer Head extends TimeUnit, ...infer Tail extends TimeUnit[]]
+	? Head extends U
+		? never
+		: Head | TimeUnitsAbove<U, Tail>
+	: never;
 
 /**
 Parse milliseconds into an object.
@@ -37,4 +54,7 @@ parseMilliseconds(1337000001);
 // }
 ```
 */
-export default function parseMilliseconds<T extends number | bigint>(milliseconds: T, options?: Options): TimeComponents<T>;
+export default function parseMilliseconds<T extends number | bigint, LargestUnit extends TimeUnit = 'days'>(
+	milliseconds: T,
+	options?: Options<LargestUnit>,
+): Omit<TimeComponents<T>, TimeUnitsAbove<LargestUnit>>;

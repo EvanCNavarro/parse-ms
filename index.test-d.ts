@@ -27,3 +27,14 @@ expectTypeOf(result3.days).toBe<number>();
 
 const result4: TimeComponents<bigint> = parseMilliseconds(3000n, {weeks: true});
 expectTypeOf(result4.weeks).toBe<bigint | undefined>();
+
+const inputNumber = 3000 as number;
+
+const result5 = parseMilliseconds(inputNumber, {largestUnit: 'hours'});
+expectTypeOf(result5.hours).toBe<number>();
+expectTypeOf<'days' extends keyof typeof result5 ? true : false>().toBe<false>();
+
+const result6 = parseMilliseconds(inputNumber);
+expectTypeOf(result6.days).toBe<number>();
+expectTypeOf<'days' extends keyof typeof result6 ? true : false>().toBe<true>();
+expectTypeOf(result6).toBe<TimeComponents<number>>();

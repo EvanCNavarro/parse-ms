@@ -318,3 +318,44 @@ test('parse milliseconds with weeks option', () => {
 	assert.strictEqual(bigintWithWeeks.weeks, 3n);
 	assert.strictEqual(bigintWithWeeks.days, 2n);
 });
+
+test('parse milliseconds with largestUnit option', () => {
+	const milliseconds = 144_000_000;
+
+	const result = parseMilliseconds(milliseconds, {largestUnit: 'hours'});
+	assert.deepStrictEqual(result, {
+		hours: 40,
+		minutes: 0,
+		seconds: 0,
+		milliseconds: 0,
+		microseconds: 0,
+		nanoseconds: 0,
+	});
+	assert.ok(!('days' in result));
+
+	const bigintResult = parseMilliseconds(BigInt(milliseconds), {largestUnit: 'hours'});
+	assert.deepStrictEqual(bigintResult, {
+		hours: 40n,
+		minutes: 0n,
+		seconds: 0n,
+		milliseconds: 0n,
+		microseconds: 0n,
+		nanoseconds: 0n,
+	});
+	assert.ok(!('days' in bigintResult));
+
+	const withoutOption = parseMilliseconds(milliseconds);
+	assert.deepStrictEqual(withoutOption, {
+		days: 1,
+		hours: 16,
+		minutes: 0,
+		seconds: 0,
+		milliseconds: 0,
+		microseconds: 0,
+		nanoseconds: 0,
+	});
+
+	assert.throws(() => {
+		parseMilliseconds(1000, {largestUnit: 'not-a-real-unit'});
+	}, TypeError);
+});

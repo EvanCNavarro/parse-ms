@@ -38,7 +38,41 @@ parseMilliseconds(1337000001n);
 	nanoseconds: 0n
 }
 */
+
+parseMilliseconds(144_000_000, {largestUnit: 'hours'});
+/*
+{
+	hours: 40,
+	minutes: 0,
+	seconds: 0,
+	milliseconds: 0,
+	microseconds: 0,
+	nanoseconds: 0
+}
+*/
 ```
+
+## API
+
+### parseMilliseconds(milliseconds, options?)
+
+#### options
+
+Type: `object`
+
+##### weeks
+
+Type: `boolean`\
+Default: `false`
+
+Include a `weeks` field, reducing `days` to its 0-6 remainder.
+
+##### largestUnit
+
+Type: `string`\
+Default: `'days'`
+
+The largest unit to include in the result, one of `'days'`, `'hours'`, `'minutes'`, `'seconds'`, `'milliseconds'`, `'microseconds'`, `'nanoseconds'`. Every unit above it is folded into it and omitted from the returned object.
 
 ## Related
 

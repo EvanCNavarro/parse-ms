@@ -2,6 +2,9 @@
 const SCALING_EPSILON = 0.0000001;
 const MAX_NANOSECONDS_IN_MILLISECOND = 999_999;
 
+const UNITS = ['days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds', 'nanoseconds'];
+const FACTORS = [24, 60, 60, 1000, 1000, 1000]; // FACTORS[i] converts UNITS[i] into UNITS[i + 1].
+
 function parseNumber(milliseconds) {
 	// The sub-millisecond parts come from scaling the value to nanoseconds, which recovers its intended decimal best. That scaling leaves the exact integer range above ~9e9ms, so it is reduced modulo a second there to avoid yielding phantom values for what is a whole number of milliseconds.
 	const scaledNanoseconds = (Number.isSafeInteger(Math.trunc(milliseconds) * 1e6) ? milliseconds : milliseconds % 1000) * 1e6;
@@ -51,8 +54,33 @@ function applyWeeks(components) {
 	};
 }
 
+function applyLargestUnit(components, largestUnit) {
+	const index = UNITS.indexOf(largestUnit);
+	if (index === -1) {
+		throw new TypeError(`Expected largestUnit to be one of ${UNITS.join(', ')}, got \`${largestUnit}\``);
+	}
+
+	if (index === 0) {
+		return components;
+	}
+
+	const isBigint = typeof components.days === 'bigint';
+	let carry = isBigint ? 0n : 0;
+	for (let i = 0; i < index; i++) {
+		const factor = isBigint ? BigInt(FACTORS[i]) : FACTORS[i];
+		carry = (carry + components[UNITS[i]]) * factor;
+	}
+
+	const result = {};
+	for (let i = index; i < UNITS.length; i++) {
+		result[UNITS[i]] = i === index ? (carry + components[UNITS[i]]) : components[UNITS[i]];
+	}
+
+	return result;
+}
+
 export default function parseMilliseconds(milliseconds, options = {}) {
-	const {weeks = false} = options;
+	const {weeks = false, largestUnit = 'days'} = options;
 
 	let components;
 	switch (typeof milliseconds) {
@@ -76,5 +104,7 @@ export default function parseMilliseconds(milliseconds, options = {}) {
 		}
 	}
 
-	return weeks ? applyWeeks(components) : components;
+	components = applyLargestUnit(components, largestUnit);
+
+	return (weeks && largestUnit === 'days') ? applyWeeks(components) : components;
 }
