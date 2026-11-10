@@ -1,4 +1,5 @@
 export type TimeComponents<T extends (number | bigint) = number> = {
+	weeks?: T;
 	days: T;
 	hours: T;
 	minutes: T;
@@ -6,6 +7,15 @@ export type TimeComponents<T extends (number | bigint) = number> = {
 	milliseconds: T;
 	microseconds: T;
 	nanoseconds: T;
+};
+
+export type Options = {
+	/**
+	Include a `weeks` field, reducing `days` to its 0-6 remainder.
+
+	@default false
+	*/
+	readonly weeks?: boolean;
 };
 
 /**
@@ -27,4 +37,4 @@ parseMilliseconds(1337000001);
 // }
 ```
 */
-export default function parseMilliseconds<T extends number | bigint>(milliseconds: T): TimeComponents<T>;
+export default function parseMilliseconds<T extends number | bigint>(milliseconds: T, options?: Options): TimeComponents<T>;

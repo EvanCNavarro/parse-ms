@@ -39,22 +39,42 @@ function parseBigint(milliseconds) {
 	};
 }
 
-export default function parseMilliseconds(milliseconds) {
+function applyWeeks(components) {
+	const isBigint = typeof components.days === 'bigint';
+	const weeks = isBigint ? (components.days / 7n) : Math.trunc(components.days / 7);
+	const days = isBigint ? (components.days % 7n) : (components.days % 7);
+
+	return {
+		weeks,
+		...components,
+		days,
+	};
+}
+
+export default function parseMilliseconds(milliseconds, options = {}) {
+	const {weeks = false} = options;
+
+	let components;
 	switch (typeof milliseconds) {
 		case 'number': {
 			if (Number.isFinite(milliseconds)) {
-				return parseNumber(milliseconds);
+				components = parseNumber(milliseconds);
+			} else {
+				throw new TypeError('Expected a finite number or bigint');
 			}
 
 			break;
 		}
 
 		case 'bigint': {
-			return parseBigint(milliseconds);
+			components = parseBigint(milliseconds);
+			break;
 		}
 
-		// No default
+		default: {
+			throw new TypeError('Expected a finite number or bigint');
+		}
 	}
 
-	throw new TypeError('Expected a finite number or bigint');
+	return weeks ? applyWeeks(components) : components;
 }
