@@ -1,0 +1,11 @@
+grade:
+  guards:
+    # Proposed by ChangeFabric from this repo's CI (#1868): .github/workflows/main.yml › test
+    - when: "**"
+      run: npm install && npm test
+launch:
+  # Proposed by ChangeFabric: no deploy job was found in this repo's CI, so ChangeFabric treats a merged change as
+  # needing no deploy. If this repo deploys another way, add an entry instead:
+  #   - check: "<the deploy job's check-run name>"
+  #     when: "<the paths whose change needs it>"
+  deploy: []
