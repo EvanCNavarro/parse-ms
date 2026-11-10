@@ -20,3 +20,10 @@ expectTypeOf(result2.seconds).toBe<bigint>();
 expectTypeOf(result2.milliseconds).toBe<bigint>();
 expectTypeOf(result2.microseconds).toBe<bigint>();
 expectTypeOf(result2.nanoseconds).toBe<bigint>();
+
+const result3: TimeComponents = parseMilliseconds(3000, {weeks: true});
+expectTypeOf(result3.weeks).toBe<number | undefined>();
+expectTypeOf(result3.days).toBe<number>();
+
+const result4: TimeComponents<bigint> = parseMilliseconds(3000n, {weeks: true});
+expectTypeOf(result4.weeks).toBe<bigint | undefined>();

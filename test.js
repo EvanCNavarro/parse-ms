@@ -292,3 +292,29 @@ test('keep the sub-day parts exact at any magnitude', () => {
 		assert.strictEqual(parsed.hours, Number(bigint.hours), `${milliseconds}ms hours against the bigint path`);
 	}
 });
+
+test('parse milliseconds with weeks option', () => {
+	const milliseconds = 1000 * 60 * 60 * 24 * 23;
+
+	const withWeeks = parseMilliseconds(milliseconds, {weeks: true});
+	assert.strictEqual(withWeeks.weeks, 3);
+	assert.strictEqual(withWeeks.days, 2);
+	assert.ok(withWeeks.days >= 0);
+	assert.ok(withWeeks.days < 7);
+
+	const withoutOption = parseMilliseconds(milliseconds);
+	const withWeeksFalse = parseMilliseconds(milliseconds, {weeks: false});
+	assert.deepStrictEqual(withWeeksFalse, withoutOption);
+	assert.ok(!('weeks' in withoutOption));
+	assert.ok(!('weeks' in withWeeksFalse));
+
+	// Boundary: exactly 7 days.
+	const sevenDays = parseMilliseconds(604_800_000, {weeks: true});
+	assert.strictEqual(sevenDays.weeks, 1);
+	assert.strictEqual(sevenDays.days, 0);
+
+	// Bigint input.
+	const bigintWithWeeks = parseMilliseconds(23n * 86_400_000n, {weeks: true});
+	assert.strictEqual(bigintWithWeeks.weeks, 3n);
+	assert.strictEqual(bigintWithWeeks.days, 2n);
+});
